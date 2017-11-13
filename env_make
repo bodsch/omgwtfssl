@@ -1,0 +1,9 @@
+PORTS =
+
+VOLUMES = \
+  --volume ${PWD}/secure:/certs \
+
+ENV = \
+  --env SILENT=1 \
+  --env SSL_SUBJECT=localhost
+

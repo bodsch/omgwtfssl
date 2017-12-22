@@ -1,0 +1,25 @@
+sudo: required
+# dist: trusty
+
+group: edge
+
+# sudo: required
+# group: deprecated-2017Q2
+
+services:
+  - docker
+
+install:
+  - travis_retry docker build --tag bodsch/omgwtfssl .
+  - docker run --detach --name omgwtfssl bodsch/omgwtfssl
+
+script:
+  - docker ps | grep -q omgwtfssl
+
+notifications:
+  email: false
+
+cache:
+  directories:
+    - $HOME/docker
+

@@ -5,5 +5,5 @@ VOLUMES = \
 
 ENV = \
   --env SILENT=1 \
-  --env SSL_SUBJECT=localhost
+  --env CERT_SUBJECT_CN=localhost
 

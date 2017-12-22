@@ -8,11 +8,14 @@ Sick of googling every time you need a self signed certificate?
 
 OMGWTFSSL is a small (< 8 mb) docker image based off `alpine linux` which makes creating self signed SSL certs easier.
 
+**forked from [paulczar/omgwtfssl](https://github.com/paulczar/omgwtfssl)**
+
 It will dump the certs it generators into `/certs` by default and will also output them to stdout in a standard
 YAML form making them easy to consume in Ansible or other tools that use YAML.
 
 ```
-docker run -e SSL_SUBJECT="example.com" paulczar/omgwtfssl
+docker run -e CERT_SUBJECT_CN="example.com" bodsch/omgwtfssl
+
 ----------------------------
 | OMGWTFSSL Cert Generator |
 ----------------------------
@@ -164,22 +167,30 @@ Advanced Usage
 
 Customize the certs using the following Environment Variables:
 
+* `DH_SIZE` DH file, default `2048` __[1]__
+
 * `CA_KEY` CA Key file, default `ca-key.pem` __[1]__
 * `CA_CERT` CA Certificate file, default `ca.pem` __[1]__
-* `CA_SUBJECT` CA Subject, default `test-ca`
 * `CA_EXPIRE` CA Expiry, default `60` days
+
 * `SSL_CONFIG` SSL Config, default `openssl.cnf` __[1]__
 * `SSL_KEY` SSL Key file, default `key.pem`
 * `SSL_CSR` SSL Cert Request file, default `key.csr`
 * `SSL_CERT` SSL Cert file, default `cert.pem`
 * `SSL_SIZE` SSL Cert size, default `2048` bits
-* `SSL_EXPIRE` SSL Cert expiry, default `60` days
-* `SSL_SUBJECT` SSL Subject default `example.com`
+* `SSL_EXPIRE` SSL Cert expiry, default `320` days
+
+* `CERT_SUBJECT_C` SSL Cert Country, default: `DE`
+* `CERT_SUBJECT_ST` SSL Cert State, default: `XXXX`
+* `CERT_SUBJECT_L` SSL Cert Location, default: `XXXX`
+* `CERT_SUBJECT_O` SSL Cert Organisation, default: `self signed`
+* `CERT_SUBJECT_CN` SSL Cert Common Name, default: `${HOSTNAME}`
+
 * `SSL_DNS` comma seperate list of alternative hostnames, no default [2]
 * `SSL_IP` comma seperate list of alternative IPs, no default [2]
 
 __[1] If file already exists will re-use.__
-__[2] If `SSL_DNS` or `SSL_IP` is set will add `SSL_SUBJECT` to alternative hostname list__
+__[2] If `SSL_DNS` or `SSL_IP` is set will add `CERT_SUBJECT_CN` to alternative hostname list__
 
 Examples
 --------
@@ -191,7 +202,7 @@ _Creating web certs for testing SSL just got a hell of a lot easier..._
 Create Certificate:
 ```
 $ docker run -v /tmp/certs:/certs \
-  -e SSL_SUBJECT=test.example.com   paulczar/omgwtfssl
+  -e SSL_SUBJECT=test.example.com   bodsch/omgwtfssl
 ```
 
 Enable SSL in `/etc/nginx/sites-enabled/default`:
@@ -229,15 +240,15 @@ $ curl --cacert /tmp/certs/ca.pem https://test.example.com
 
 ### Create keys for docker registry
 
-_Slightly more interesting example of using `paulczar/omgwtfssl` as a volume container to build and host SSL certs for the Docker Registry image_
+_Slightly more interesting example of using `bodsch/omgwtfssl` as a volume container to build and host SSL certs for the Docker Registry image_
 
-Create the volume container for the registry from `paulczar/omgwtfssl`:
+Create the volume container for the registry from `bodsch/omgwtfssl`:
 
 ```
 $ docker run \
   --name certs \
   -e SSL_SUBJECT=test.example.com \
-  paulczar/omgwtfssl
+  bodsch/omgwtfssl
 ----------------------------
 | OMGWTFSSL Cert Generator |
 ----------------------------
@@ -277,7 +288,7 @@ $ docker run -d \
 Make sure it works:
 ```
 $ echo "127.0.2.1       test.example.com" >> /etc/hosts
-$ docker tag paulczar/omgwtfssl test.example.com:5000/omgwtfbbq
+$ docker tag bodsch/omgwtfssl test.example.com:5000/omgwtfbbq
 $ docker push test.example.com:5000/omgwtfbbq
 The push refers to a repository [test.example.com:5000/omgwtfbbq] (len: 1)
 e34964fe7cfa: Pushed
@@ -290,7 +301,7 @@ latest: digest: sha256:8a97202b0ad9b375ff478d84ed948ae7ddd298196fd3b341fc8391a0f
 ### Generate Keys for Kubernetes Secret:
 
 ```
-$docker run -ti --rm -e OUTPUT=k8s -e SSL_SUBJECT=test.example.com paulczar/omgwtfssl
+$docker run -ti --rm -e OUTPUT=k8s -e SSL_SUBJECT=test.example.com bodsch/omgwtfssl
 ----------------------------
 | OMGWTFSSL Cert Generator |
 ----------------------------
@@ -321,7 +332,7 @@ keys can be found in volume mapped to /certs
 apiVersion: v1
 kind: Secret
 metadata:
-  name: omgwtfssl 
+  name: omgwtfssl
   namespace: default
 type: kubernetes.io/tls
 data:

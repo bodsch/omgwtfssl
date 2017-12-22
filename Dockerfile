@@ -1,16 +1,29 @@
-FROM alpine
+
+FROM alpine:3.7
+
+ENV \
+  TERM=xterm \
+  BUILD_DATE="2017-12-22"
+
+LABEL \
+  version="1712" \
+  maintainer="Bodo Schulz <bodo@boone-schulz.de>" \
+  org.label-schema.vendor="Bodo Schulz" \
+  org.label-schema.schema-version="1.0" \
+  com.microscaling.docker.dockerfile="/Dockerfile"
+
+# ---------------------------------------------------------------------------------------
 
 RUN \
-  apk --no-cache update && \
-  apk --no-cache upgrade && \
-  apk --no-cache add \
+  apk update --quiet --no-cache && \
+  apk upgrade --quiet --no-cache && \
+  apk add --quiet --no-cache \
     bash \
     openssl
 
-WORKDIR /certs
-
 COPY generate-certs /usr/bin/generate-certs
 
-CMD /usr/bin/generate-certs
+VOLUME [ "/certs" ]
+WORKDIR "/certs"
 
-VOLUME /certs
+CMD [ "/usr/bin/generate-certs" ]

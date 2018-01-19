@@ -1,10 +1,6 @@
 sudo: required
-# dist: trusty
 
 group: edge
-
-# sudo: required
-# group: deprecated-2017Q2
 
 services:
   - docker
@@ -16,10 +12,10 @@ install:
 script:
   - docker ps | grep -q omgwtfssl
 
-notifications:
-  email: false
-
-cache:
-  directories:
-    - $HOME/docker
-
+after_success:
+  - |
+    [ "${TRAVIS_BRANCH}" == "master" ] && curl \
+      --request POST \
+      --header "Content-Type: application/json"  \
+      --data '{"source_type":"Branch","source_name":"master"}' \
+      https://registry.hub.docker.com/u/bodsch/omgwtfssl/trigger/${DOCKER_HUB_TOKEN}/

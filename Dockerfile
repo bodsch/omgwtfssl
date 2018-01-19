@@ -3,10 +3,10 @@ FROM alpine:3.7
 
 ENV \
   TERM=xterm \
-  BUILD_DATE="2017-12-22"
+  BUILD_DATE="2018-01-19"
 
 LABEL \
-  version="1712" \
+  version="1801" \
   maintainer="Bodo Schulz <bodo@boone-schulz.de>" \
   org.label-schema.vendor="Bodo Schulz" \
   org.label-schema.schema-version="1.0" \
